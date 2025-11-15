@@ -1,0 +1,7 @@
+{
+	"debug.javascript.usePreview": true,
+	"debug.javascript.autoAttachFilter": "smart",
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"typescript.enablePromptUseWorkspaceTsdk": true
+}
+

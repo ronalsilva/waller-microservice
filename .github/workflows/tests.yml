@@ -1,0 +1,52 @@
+name: Run Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prepare database
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/testdb"
+        run: |
+          npx prisma generate
+          npx prisma db push
+
+      - name: Run tests
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/testdb"
+        run: npm test

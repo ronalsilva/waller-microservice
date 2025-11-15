@@ -1,0 +1,33 @@
+{
+	"name": "wallet-ilia",
+	"version": "0.0.1",
+	"main": "index.js",
+	"author": "Ronald Junger",
+	"scripts": {
+		"dev": "tsnd --respawn --transpile-only --exit-child -r tsconfig-paths/register src/app.ts",
+		"test": "jest --coverage --forceExit --detectOpenHandles --maxWorkers=10",
+		"start": "ts-node -r tsconfig-paths/register src/app.ts",
+		"build": "tsc --skipLibCheck",
+		"db": "npx prisma db push & npx prisma generate",
+		"docker": "docker-compose up -d"
+	},
+	"dependencies": {
+		"@fastify/cors": "^10.1.0",
+		"@fastify/jwt": "^9.1.0",
+		"@fastify/swagger": "^9.5.1",
+		"@fastify/swagger-ui": "^5.2.3",
+		"@prisma/client": "^5.22.0",
+		"dotenv": "^16.6.1",
+		"fastify": "^5.4.0",
+		"socket.io": "^4.8.1",
+		"ts-jest": "^29.2.5",
+		"ts-node": "^10.9.2"
+	},
+	"devDependencies": {
+		"@types/jest": "^30.0.0",
+		"@types/node": "^22.15.32",
+		"prisma": "^5.22.0",
+		"ts-node-dev": "^2.0.0",
+		"tsconfig-paths": "^4.2.0"
+	}
+}

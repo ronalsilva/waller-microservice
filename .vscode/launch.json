@@ -1,0 +1,53 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Debug Wallet API",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceFolder}/src/app.ts",
+			"runtimeArgs": [
+				"-r",
+				"ts-node/register",
+				"-r",
+				"tsconfig-paths/register"
+			],
+			"env": {
+				"TS_NODE_PROJECT": "tsconfig.json",
+				"NODE_ENV": "development"
+			},
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"sourceMaps": true,
+			"resolveSourceMapLocations": [
+				"${workspaceFolder}/**",
+				"!**/node_modules/**"
+			],
+			"restart": true,
+			"protocol": "inspector",
+			"cwd": "${workspaceFolder}",
+			"outputCapture": "std"
+		},
+		{
+			"name": "Debug Wallet API (Attach)",
+			"type": "node",
+			"request": "attach",
+			"port": 9229,
+			"restart": true,
+			"localRoot": "${workspaceFolder}",
+			"remoteRoot": "${workspaceFolder}",
+			"protocol": "inspector",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"sourceMaps": true,
+			"resolveSourceMapLocations": [
+				"${workspaceFolder}/**",
+				"!**/node_modules/**"
+			]
+		}
+	]
+}
