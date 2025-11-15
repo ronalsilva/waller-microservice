@@ -1,7 +1,7 @@
 import buildServer from "./server";
 import { FastifyInstance } from "fastify";
 
-const PORT = Number(process.env.PORT) || 3002;
+const PORT = Number(process.env.PORT) || 3001;
 
 async function startServer(server: FastifyInstance): Promise<void> {
     try {

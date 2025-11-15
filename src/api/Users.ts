@@ -1,12 +1,9 @@
 import { FastifyInstance } from "fastify";
-import { createUserSchema, getUserSchema, updateUserSchema, deleteUserSchema } from "@schemas/Users"
-import { createUserController, getUserController, updateUserController, deleteUserController } from "@controllers/Users";
+import { getUserBalanceSchema } from "@schemas/Users"
+import { getUserBalanceController } from "@controllers/Users";
 
 async function userRoutes(fastify: FastifyInstance) {
-    fastify.get("", { schema: getUserSchema }, getUserController);
-    fastify.post("", { schema: createUserSchema }, createUserController);
-    fastify.put("", { schema: updateUserSchema }, updateUserController);
-    fastify.delete("", { schema: deleteUserSchema }, deleteUserController);
+    fastify.get("/balance", { schema: getUserBalanceSchema, preHandler: fastify.authenticate }, getUserBalanceController);
 }
 
 export default userRoutes;
