@@ -14,13 +14,49 @@ enum Status {
   finished
 }
 
-model User {
+enum TransactionType {
+  credit
+  debit
+  transfer
+  deposit
+  withdrawal
+}
+
+model wallet_ilia {
+  id                 String           @id @default(uuid())
+  user_id            String           @unique
+  balance            Float            @default(0)
+  transactions       wallet_ilia_transaction[]
+  received_transfers wallet_ilia_transaction[] @relation("TransferReceiver")
+  sent_transfers     wallet_ilia_transaction[] @relation("TransferSender")
+  created_at         DateTime?        @default(now())
+  updated_at         DateTime?        @updatedAt
+}
+
+model wallet_ilia_transaction {
   id               String           @id @default(uuid())
-  first_name       String
-  last_name        String
-  email            String           @unique
-  password         String
-  salt             String?
-  profile_picture  String?
+  wallet_ilia_id   String
+  wallet           wallet_ilia     @relation(fields: [wallet_ilia_id], references: [id], onDelete: Cascade)
+  amount           Float
+  type             TransactionType
+  description      String
+  // Para transferências: wallet que recebe o dinheiro (se type = transfer)
+  receiver_wallet_id String?
+  receiver_wallet    wallet_ilia?   @relation("TransferReceiver", fields: [receiver_wallet_id], references: [id])
+  // Para transferências: wallet que envia o dinheiro (se type = transfer)
+  sender_wallet_id   String?
+  sender_wallet      wallet_ilia?   @relation("TransferSender", fields: [sender_wallet_id], references: [id])
+  created_by         String
+  updated_by         String?
+  history            wallet_ilia_history?
+  created_at         DateTime?        @default(now())
+  updated_at         DateTime?        @updatedAt
+}
+
+model wallet_ilia_history {
+  id               String           @id @default(uuid())
+  transaction_id   String           @unique
+  transaction      wallet_ilia_transaction @relation(fields: [transaction_id], references: [id], onDelete: Cascade)
   created_at       DateTime?        @default(now())
+  updated_at       DateTime?        @updatedAt
 }

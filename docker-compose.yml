@@ -1,9 +1,22 @@
+version: "1.0.0"
+
 services:
   db:
     image: postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: clients-db-ilia
+      POSTGRES_DB: wallet-db-ilia
     ports:
-      - 5431:5432
+      - 5432:5432
+
+  # db-admin:
+  #   image: dpage/pgadmin4
+  #   restart: always
+  #   ports:
+  #     - 9091:80
+  #   depends_on:
+  #     - db
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin
