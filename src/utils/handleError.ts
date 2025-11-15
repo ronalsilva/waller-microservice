@@ -79,6 +79,23 @@ function handleError(err: any, response: FastifyReply): void {
                 message: "Tempo esgotado ao buscar uma nova conexão do pool de conexões"
             });
             break;
+        case "404":
+            if (err.message) {
+                response.code(404).send({
+                    error: 404,
+                    message: err.message
+                });
+            } else {
+                response.code(404).send({
+                    error: 404,
+                    message: "Recurso não encontrado"
+                });
+            }
+            response.code(404).send({
+                error: 404,
+                message: err.message
+            });
+            break;
         default:
             response.code(500).send({
                 error: 500,

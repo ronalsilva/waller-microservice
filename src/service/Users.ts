@@ -1,85 +1,20 @@
-import { User } from "@prisma/client";
+import { wallet_ilia } from "@prisma/client";
 import prisma from "@utils/dbConnection";
 import handleError from "@utils/handleError";
-import { hashPassword } from "@utils/hash";
 import { FastifyReply } from "fastify";
 
-interface CreateUserResult {
-    id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    profile_picture: string | null;
-    created_at: Date | null;
-}
-
-export async function createUser(response: FastifyReply, user: User): Promise<CreateUserResult | void> {
-    const { hash, salt } = hashPassword(user.password);
-    const userData = { ...user, password: hash, salt };
-
+export async function getUserBalance(response: FastifyReply, id: string): Promise<wallet_ilia | void> {
     try {
-        const result = await prisma.user.create({
-            data: userData,
+        const result = await prisma.wallet_ilia.findUnique({
+            where: { user_id: id },
             select: {
-                id: true,
-                first_name: true,
-                last_name: true,
-                email: true,
-                profile_picture: true,
-                created_at: true
-            }
-        });
-        return result as CreateUserResult;
-    } catch (err: any) {
-        handleError(err, response);
-    }
-}
-
-export async function getUser(response: FastifyReply, email: string): Promise<CreateUserResult | void> {
-    try {
-        const result = await prisma.user.findUnique({
-            where: { email },
-            select: {
-                id: true,
-                first_name: true,
-                last_name: true,
-                email: true,
-                profile_picture: true,
+                balance: true,
                 created_at: true,
-                salt: true,
-                password: true  
+                updated_at: true
             }
         });
-        return result as User;
+        return result as wallet_ilia;
     } catch (err: any) {
         handleError(err, response);
-    }
-}
-
-export async function updateUser(response: FastifyReply, email: string, user: Partial<User>): Promise<CreateUserResult | void> {
-    try {
-        const result = await prisma.user.update({
-            where: { email },
-            data: user,
-            select: {
-                first_name: true,
-                last_name: true,
-                email: true,
-                profile_picture: true,
-                created_at: true
-            }
-        });
-        return result as CreateUserResult;
-    } catch (err: any) {
-        handleError(err, response);
-    }
-}
-
-export async function deleteUser(response: FastifyReply, email: string): Promise<void> {
-    try {
-        await prisma.user.delete({ where: { email } });
-    } catch (err: any) {
-        handleError(err, response);
-        throw new Error("Erro ao deletar usuário");
     }
 }
