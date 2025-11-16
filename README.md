@@ -7,6 +7,7 @@ Microservico de gerenciamento de carteiras digitais. API RESTful construida com 
 - **Runtime**: Node.js
 - **Framework**: Fastify
 - **Linguagem**: TypeScript
+- **Mensageria**: Kafka
 - **ORM**: Prisma
 - **Banco de Dados**: PostgreSQL
 - **Autenticação**: JWT (JSON Web Tokens)
@@ -54,8 +55,10 @@ Crie um arquivo `.env` na raiz do projeto com as seguintes variaveis:
 
 ```env
 DATABASE_URL="postgresql://postgres:admin@localhost:5432/wallet-db-ilia"
-JWT_SECRET="ILIACHALLENGE"
-PORT=3002
+JWT_SECRET = "ILIACHALLENGE"
+PORT= 3001
+KAFKA_BROKER=localhost:9092
+CLIENT_MICROSERVICE_JWT_SECRET=ILIACHALLENGEs
 ```
 
 4. **Inicie o banco de dados com Docker**:
@@ -74,6 +77,34 @@ Ou use o script npm:
 npm run db
 ```
 
+## Kafka
+
+- Integracao com `client-microservice` via Kafka para autenticacao e obtencao de dados do usuario.
+- Producer e consumer implementados com Kafka.
+- Ao subir com `docker-compose`, serao iniciados: PostgreSQL, Zookeeper e Kafka.
+
+### Variaveis de ambiente
+
+- `KAFKA_BROKER` (ex.: `localhost:9092`) — endereco do broker Kafka
+- `CLIENT_MICROSERVICE_JWT_SECRET` — segredo compartilhado para validar o JWT entre microservicos
+
+### Topicos
+
+- `client-microservice-requests` — envio de requisicoes ao `client-microservice`
+  - Acoes:
+    - `validateTokenAndGetUser` — valida token e retorna dados do usuario
+    - `getUserById` — busca usuario por ID
+- `client-microservice-responses` — recebimento de respostas do `client-microservice`
+  - Formato esperado: `{ correlationId: string, user?: {...}, error?: string, message?: string }`
+
+### Fluxo resumido
+
+- O middleware `authenticateClientJWT` extrai o token do header `Authorization` e o envia via Kafka (acao `validateTokenAndGetUser`).
+- O consumer aguarda a resposta no topico de `responses` e preenche `request.clientUser`.
+- Quando necessario obter dados por ID, o servico `userService` publica `getUserById` e aguarda a resposta correlacionada.
+
+Mais detalhes em `src/middleware/README.md`.
+
 ## Executando o Projeto
 
 ### Modo Desenvolvimento
@@ -86,7 +117,7 @@ F5
 
 O servidor estara disponível em `http://localhost:3002`
 
-### Modo Produção
+### Modo Producao
 ```bash
 npm run build
 npm run start
@@ -102,7 +133,7 @@ A documentacao inclui:
 - Todos os endpoints disponiveis
 - Schemas de requisicao e resposta
 - Exemplos de uso
-- Autenticação JWT
+- Autenticacao JWT
 
 ## Testes
 
@@ -118,6 +149,8 @@ waller-microservice/
 ├── src/
 │   ├── api/              # Definição das rotas
 │   ├── controllers/      # Lógica de controle
+│   ├── middleware/      
+│   │   └── kafka         #configuracao e funcoes do kafka
 │   ├── schemas/          # Schemas de validação
 │   ├── service/          # Lógica de negócio
 │   ├── utils/            # Utilitários
@@ -134,7 +167,10 @@ waller-microservice/
 
 ## Docker
 
-### Iniciar apenas o banco de dados
+### Iniciar infraestrutura (DB, Zookeeper e Kafka)
+
+Docker composer ja esta configurado.
+
 ```bash
 docker-compose up -d
 ```

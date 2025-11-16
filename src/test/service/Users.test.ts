@@ -3,7 +3,6 @@ import { getUserBalance } from "@service/Users";
 import prisma from "@utils/dbConnection";
 import handleError from "@utils/handleError";
 
-// Mock do Prisma e handleError
 jest.mock("@utils/dbConnection", () => ({
     __esModule: true,
     default: {
@@ -27,7 +26,6 @@ describe("Users Service", () => {
             send: jest.fn().mockReturnThis(),
         };
 
-        // Reset mocks
         jest.clearAllMocks();
         mockedHandleError.mockImplementation(() => {});
     });
