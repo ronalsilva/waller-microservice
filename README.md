@@ -83,6 +83,10 @@ npm run db
 - Producer e consumer implementados com Kafka.
 - Ao subir com `docker-compose`, serao iniciados: PostgreSQL, Zookeeper e Kafka.
 
+### IMPORTANTE 
+
+Poderia usar o security -> protocol, ssl -> keystore, ssl -> protocol, protocolos do Kafka para configurar SSL, mas iria fica mais complexo e sei minhas limitacoes, nao queria perder tempo aprendendo e tentando configurar isso agora, essa e a primeira fez que trabalho com Kafka.
+
 ### Variaveis de ambiente
 
 - `KAFKA_BROKER` (ex.: `localhost:9092`) — endereco do broker Kafka
