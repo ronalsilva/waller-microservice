@@ -96,3 +96,23 @@ export async function transferMoney(response: FastifyReply, sender_id: string, a
         handleError(err, response);
     }
 }
+
+export async function getMoneyTransactions(response: FastifyReply, wallet_id: string): Promise<wallet_ilia_transaction[] | void> {
+    try {
+        const transactions = await prisma.wallet_ilia_transaction.findMany({
+            where: { wallet_ilia_id: wallet_id },
+            select: {
+                id: true,
+                amount: true,
+                type: true,
+                description: true,
+                created_at: true,
+                updated_at: true
+            }
+        });
+        return transactions as wallet_ilia_transaction[];
+    } catch (err: any) {
+        handleError(err, response);
+        return [];
+    }
+}

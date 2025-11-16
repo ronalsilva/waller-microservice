@@ -10,7 +10,12 @@ export const getUserBalanceSchema = {
     security: [{ bearerAuth: [] }],
     response: {
         200: {
-            balance: { type: 'number' }
+            type: 'object',
+            properties: {
+                balance: { type: 'number' },
+                created_at: { type: 'string' },
+                updated_at: { type: 'string' }
+            }
         },
         404: ErrorDeafult,
         400: ErrorDeafult,
