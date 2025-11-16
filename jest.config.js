@@ -36,6 +36,7 @@ module.exports = {
 		'^@db/(.*)$': '<rootDir>/src/database/$1',
 		'^@controllers/(.*)$': '<rootDir>/src/controllers/$1',
 		'^@schemas/(.*)$': '<rootDir>/src/schemas/$1',
+		'^@middleware/(.*)$': '<rootDir>/src/middleware/$1',
 	},
 	verbose: true,
 	globals: {
@@ -50,6 +51,7 @@ module.exports = {
 					'@db/*': ['database/*'],
 					'@controllers/*': ['controllers/*'],
 					'@schemas/*': ['schemas/*'],
+					'@middleware/*': ['middleware/*'],
 				},
 			},
 		},

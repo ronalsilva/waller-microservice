@@ -1,25 +1,28 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { getUserBalanceController } from "@controllers/Users";
 import * as UsersService from "@service/Users";
+import { getUserByIdFromClientService } from "@middleware/kafka/userService";
 
 // Mock do serviço
 jest.mock("@service/Users");
+jest.mock("@middleware/kafka/userService", () => ({
+	getUserByIdFromClientService: jest.fn().mockResolvedValue({ id: "any-user" }),
+}));
 
 describe("Users Controller", () => {
     let mockRequest: Partial<FastifyRequest>;
     let mockReply: Partial<FastifyReply>;
-    let mockJwtVerify: jest.Mock;
 
     beforeEach(() => {
         // Mock do request
-        mockJwtVerify = jest.fn();
         mockRequest = {
-            jwtVerify: mockJwtVerify,
+			clientUser: { id: "user-123" } as any,
         };
 
         // Mock do reply
         mockReply = {
             code: jest.fn().mockReturnThis(),
+			status: jest.fn().mockReturnThis(),
             send: jest.fn().mockReturnThis(),
         };
 
@@ -37,7 +40,6 @@ describe("Users Controller", () => {
                 updated_at: new Date(),
             };
 
-            mockJwtVerify.mockResolvedValue({ id: "user-123" });
             (UsersService.getUserBalance as jest.Mock).mockResolvedValue(mockWallet);
 
             await getUserBalanceController(
@@ -45,7 +47,6 @@ describe("Users Controller", () => {
                 mockReply as FastifyReply
             );
 
-            expect(mockJwtVerify).toHaveBeenCalled();
             expect(UsersService.getUserBalance).toHaveBeenCalledWith(
                 mockReply,
                 "user-123"
@@ -63,7 +64,7 @@ describe("Users Controller", () => {
                 updated_at: new Date(),
             };
 
-            mockJwtVerify.mockResolvedValue({ id: "user-456" });
+			mockRequest.clientUser = { id: "user-456" } as any;
             (UsersService.getUserBalance as jest.Mock).mockResolvedValue(mockWallet);
 
             await getUserBalanceController(
@@ -76,6 +77,48 @@ describe("Users Controller", () => {
                 "user-456"
             );
         });
+
+		it("deve retornar 401 quando não autenticado", async () => {
+			delete (mockRequest as any).clientUser;
+
+			await getUserBalanceController(
+				mockRequest as FastifyRequest,
+				mockReply as FastifyReply
+			);
+
+			expect(mockReply.status).toHaveBeenCalledWith(401);
+			expect(mockReply.send).toHaveBeenCalledWith({
+				error: "Unauthorized",
+				message: "Token de autenticação inválido ou expirado",
+			});
+		});
+
+		it("deve retornar 404 quando usuário não encontrado no client-microservice", async () => {
+			(getUserByIdFromClientService as jest.Mock).mockResolvedValueOnce(null);
+
+			await getUserBalanceController(
+				mockRequest as FastifyRequest,
+				mockReply as FastifyReply
+			);
+
+			expect(mockReply.status).toHaveBeenCalledWith(404);
+			expect(mockReply.send).toHaveBeenCalledWith({
+				error: "Usuário não encontrado",
+				message: "Usuário não encontrado no client-microservice",
+			});
+		});
+
+		it("deve retornar 404 quando carteira não encontrada", async () => {
+			(UsersService.getUserBalance as jest.Mock).mockResolvedValueOnce(null);
+
+			await getUserBalanceController(
+				mockRequest as FastifyRequest,
+				mockReply as FastifyReply
+			);
+
+			expect(mockReply.status).toHaveBeenCalledWith(404);
+			expect(mockReply.send).toHaveBeenCalledWith({ error: "Carteira não encontrada" });
+		});
     });
 });
 
