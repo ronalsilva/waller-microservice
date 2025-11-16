@@ -9,7 +9,6 @@ import * as WalletService from "@service/Wallet";
 import * as UsersService from "@service/Users";
 import { getUserByIdFromClientService } from "@middleware/kafka/userService";
 
-// Mock dos serviços
 jest.mock("@service/Wallet");
 jest.mock("@service/Users");
 jest.mock("@middleware/kafka/userService", () => ({
@@ -21,20 +20,17 @@ describe("Wallet Controller", () => {
     let mockReply: Partial<FastifyReply>;
 
     beforeEach(() => {
-        // Mock do request
         mockRequest = {
 			clientUser: { id: "user-123" } as any,
             body: {},
         };
 
-        // Mock do reply
         mockReply = {
             code: jest.fn().mockReturnThis(),
             status: jest.fn().mockReturnThis(),
             send: jest.fn().mockReturnThis(),
         };
 
-        // Limpar mocks
         jest.clearAllMocks();
     });
 

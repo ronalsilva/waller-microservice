@@ -8,7 +8,6 @@ import {
 import prisma from "@utils/dbConnection";
 import handleError from "@utils/handleError";
 
-// Mock do Prisma e handleError
 jest.mock("@utils/dbConnection", () => ({
     __esModule: true,
     default: {
@@ -37,7 +36,6 @@ describe("Wallet Service", () => {
             send: jest.fn().mockReturnThis(),
         };
 
-        // Reset mocks
         jest.clearAllMocks();
         mockedPrisma.wallet_ilia.create.mockReset();
         mockedPrisma.wallet_ilia.findUnique.mockReset();
