@@ -11,7 +11,7 @@ declare module 'fastify' {
     }
 }
 
-export async function authenticateClientJWT(
+export async function autheticateClientJWT(
     request: FastifyRequest,
     reply: FastifyReply
 ): Promise<void> {
