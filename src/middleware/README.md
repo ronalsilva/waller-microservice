@@ -15,13 +15,13 @@ Essa foi a primeira fez que tive contato com Kafka, qualquer ponto de melhoria/f
 - `kafka/userService.ts` - Servico para buscar dados do usuário via Kafka
 
 ### JWT
-- `authenticateClientJWT.ts` - Middleware de autenticacao que envia o token JWT para validacao no client-microservice via Kafka
+- `autheticateClientJWT.ts` - Middleware de autenticacao que envia o token JWT para validacao no client-microservice via Kafka
 
 ## Como funciona
 
 Toda essa arquitetura foi pensada por mim Ronald :) (pelo meu entendimento), sei que poderia ser feito uma configuracao melhor
 
-1. O middleware `authenticateClientJWT` extrai o token JWT do header `Authorization: Bearer <token>`
+1. O middleware `autheticateClientJWT` extrai o token JWT do header `Authorization: Bearer <token>`
 2. O token é enviado para o client-microservice via Kafka com a acao `validateTokenAndGetUser`
 3. O client-microservice valida o token e retorna os dados do usuario
 4. O consumer recebe a resposta e preenche `request.clientUser` com os dados do usuario

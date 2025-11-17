@@ -58,7 +58,6 @@ DATABASE_URL="postgresql://postgres:admin@localhost:5432/wallet-db-ilia"
 JWT_SECRET = "ILIACHALLENGE"
 PORT= 3001
 KAFKA_BROKER=localhost:9092
-CLIENT_MICROSERVICE_JWT_SECRET=ILIACHALLENGEs
 ```
 
 4. **Inicie o banco de dados com Docker**:
@@ -90,7 +89,6 @@ Poderia usar o security -> protocol, ssl -> keystore, ssl -> protocol, protocolo
 ### Variaveis de ambiente
 
 - `KAFKA_BROKER` (ex.: `localhost:9092`) — endereco do broker Kafka
-- `CLIENT_MICROSERVICE_JWT_SECRET` — segredo compartilhado para validar o JWT entre microservicos
 
 ### Topicos
 
@@ -103,7 +101,7 @@ Poderia usar o security -> protocol, ssl -> keystore, ssl -> protocol, protocolo
 
 ### Fluxo resumido
 
-- O middleware `authenticateClientJWT` extrai o token do header `Authorization` e o envia via Kafka (acao `validateTokenAndGetUser`).
+- O middleware `autheticateClientJWT` extrai o token do header `Authorization` e o envia via Kafka (acao `validateTokenAndGetUser`).
 - O consumer aguarda a resposta no topico de `responses` e preenche `request.clientUser`.
 - Quando necessario obter dados por ID, o servico `userService` publica `getUserById` e aguarda a resposta correlacionada.
 
