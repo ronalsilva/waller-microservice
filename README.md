@@ -144,6 +144,10 @@ Execute os testes com cobertura:
 npm run test
 ```
 
+### CI/CD
+
+O projeto esta configurado com **GitHub Actions** para executar os testes unitarios automaticamente em cada push e pull request. O workflow roda os testes com cobertura e garante que o codigo esteja funcionando corretamente antes de ser mesclado.
+
 ## Estrutura do Projeto
 
 ```
