@@ -1,5 +1,3 @@
-// Essa linha deve ser carregada antes dos demais codigos para garantir
-// O corregamento das variaveis de ambiente.
 require('dotenv').config();
 
 process.env.NODE_ENV = 'TEST';
