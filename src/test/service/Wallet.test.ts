@@ -280,26 +280,29 @@ describe("Wallet Service", () => {
                 created_at: new Date(),
             };
 
+            const mockReceiverTransaction = {
+                id: "transaction-456",
+                wallet_ilia_id: "wallet-456",
+                amount: 100,
+                type: "transfer",
+                description: "Transfer received from user-123",
+                created_by: "user-123",
+                receiver_wallet_id: "wallet-456",
+                sender_wallet_id: "wallet-123",
+            };
+
             const mockTransactionClient = {
                 wallet_ilia_transaction: {
                     create: jest.fn()
                         .mockResolvedValueOnce(mockSenderTransaction)
-                        .mockResolvedValueOnce({
-                            id: "transaction-456",
-                            wallet_ilia_id: "wallet-456",
-                            amount: 100,
-                            type: "transfer",
-                            description: "Transfer received from user-123",
-                            created_by: "user-123",
-                            receiver_wallet_id: "wallet-456",
-                            sender_wallet_id: "wallet-123",
-                        }),
+                        .mockResolvedValueOnce(mockReceiverTransaction),
                     findMany: jest.fn()
                         .mockResolvedValueOnce([
-                            { id: "tx1", wallet_ilia_id: "wallet-123", amount: 100, type: "transfer", sender_wallet_id: "wallet-123", receiver_wallet_id: "wallet-456" }
+                            { id: "tx-deposit", wallet_ilia_id: "wallet-123", amount: 500, type: "deposit" },
+                            { id: "transaction-123", wallet_ilia_id: "wallet-123", amount: 100, type: "transfer", sender_wallet_id: "wallet-123", receiver_wallet_id: "wallet-456" }
                         ])
                         .mockResolvedValueOnce([
-                            { id: "tx2", wallet_ilia_id: "wallet-456", amount: 100, type: "transfer", sender_wallet_id: "wallet-123", receiver_wallet_id: "wallet-456" }
+                            { id: "transaction-456", wallet_ilia_id: "wallet-456", amount: 100, type: "transfer", sender_wallet_id: "wallet-123", receiver_wallet_id: "wallet-456" }
                         ]),
                 },
                 wallet_ilia: {
@@ -311,9 +314,10 @@ describe("Wallet Service", () => {
                 .mockResolvedValueOnce(mockSenderWallet)
                 .mockResolvedValueOnce(mockReceiverWallet);
             mockedPrisma.wallet_ilia_transaction.findMany
-                .mockResolvedValueOnce([]); // Para calcular saldo do sender antes da transferência
+                .mockResolvedValueOnce([
+                    { id: "tx-deposit", wallet_ilia_id: "wallet-123", amount: 500, type: "deposit" }
+                ]);
             
-            // Resetar o mock do $transaction para este teste específico
             mockedPrisma.$transaction.mockReset();
             mockedPrisma.$transaction.mockImplementation(async (callback: any) => {
                 try {
@@ -332,7 +336,7 @@ describe("Wallet Service", () => {
             );
 
             expect(mockedPrisma.wallet_ilia.findUnique).toHaveBeenCalledTimes(2);
-            expect(mockedPrisma.wallet_ilia_transaction.findMany).toHaveBeenCalledTimes(1); // Para calcular saldo antes da transferência
+            expect(mockedPrisma.wallet_ilia_transaction.findMany).toHaveBeenCalledTimes(1);
             expect(mockedPrisma.$transaction).toHaveBeenCalled();
             expect(result).toEqual(mockSenderTransaction);
         });
