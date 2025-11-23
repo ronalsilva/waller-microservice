@@ -3,6 +3,36 @@ import { wallet_ilia, wallet_ilia_transaction } from "@prisma/client";
 import prisma from "@utils/dbConnection";
 import handleError from "@utils/handleError";
 
+export async function calculateBalanceFromTransactions(wallet_id: string, txClient?: any): Promise<number> {
+    const client = txClient || prisma;
+    
+    const transactions = await client.wallet_ilia_transaction.findMany({
+        where: { wallet_ilia_id: wallet_id }
+    });
+
+    let balance = 0;
+    for (const transaction of transactions) {
+        switch (transaction.type) {
+            case "deposit":
+            case "credit":
+                balance += transaction.amount;
+                break;
+            case "withdrawal":
+            case "debit":
+                balance -= transaction.amount;
+                break;
+            case "transfer":
+                if (transaction.sender_wallet_id === wallet_id) {
+                    balance -= transaction.amount;
+                } else if (transaction.receiver_wallet_id === wallet_id) {
+                    balance += transaction.amount;
+                }
+                break;
+        }
+    }
+    return balance;
+}
+
 export async function createWallet(response: FastifyReply, user_id: string, balance: number = 0): Promise<wallet_ilia | void> {
     try {
         const wallet = await prisma.wallet_ilia.create({
@@ -26,27 +56,43 @@ export async function getWallet(response: FastifyReply, user_id: string): Promis
 }
     
 export async function depositMoney(response: FastifyReply, user_id: string, amount: number): Promise<wallet_ilia | void> {
-    try {       
-        const transaction = await prisma.wallet_ilia.update({
-            where: { user_id },
-            data: { balance: { increment: amount } },
-            select: {
-                id: true,
-                balance: true,
-                created_at: true,
-                updated_at: true
-            }
+    try {
+        const wallet = await prisma.wallet_ilia.findUnique({
+            where: { user_id }
         });
 
-        try {
-            await prisma.wallet_ilia_transaction.create({
-                data: { wallet_ilia_id: transaction.id, amount, type: "deposit", description: "Depósito de dinheiro", created_by: user_id }
-            });
-        } catch (err: any) {
-            handleError(err, response);
+        if (!wallet) {
+            return handleError({ code: "404", message: "Wallet not found" }, response);
         }
 
-        return transaction as wallet_ilia;
+        const result = await prisma.$transaction(async (tx) => {
+            await tx.wallet_ilia_transaction.create({
+                data: {
+                    wallet_ilia_id: wallet.id,
+                    amount,
+                    type: "deposit",
+                    description: "Money deposit",
+                    created_by: user_id
+                }
+            });
+
+            const newBalance = await calculateBalanceFromTransactions(wallet.id, tx);
+
+            const updatedWallet = await tx.wallet_ilia.update({
+                where: { id: wallet.id },
+                data: { balance: newBalance },
+                select: {
+                    id: true,
+                    balance: true,
+                    created_at: true,
+                    updated_at: true
+                }
+            });
+
+            return updatedWallet;
+        });
+
+        return result as wallet_ilia;
     } catch (err: any) {
         handleError(err, response);
     }
@@ -63,35 +109,60 @@ export async function transferMoney(response: FastifyReply, sender_id: string, a
         });
 
         if (!senderWallet) {
-            return handleError({ code: "404", message: "Carteira do remetente não encontrada" }, response);
+            return handleError({ code: "404", message: "Sender wallet not found" }, response);
         }
 
         if (!receiverWallet) {
-            return handleError({ code: "404", message: "Carteira do destinatário não encontrada" }, response);
+            return handleError({ code: "404", message: "Receiver wallet not found" }, response);
         }
 
-        await prisma.wallet_ilia.update({
-            where: { id: senderWallet.id },
-            data: { balance: { decrement: amount } }
+        const senderBalance = await calculateBalanceFromTransactions(senderWallet.id);
+        if (senderBalance < amount) {
+            return handleError({ code: "400", message: "Insufficient balance for transfer" }, response);
+        }
+
+        const result = await prisma.$transaction(async (tx) => {
+            const senderTransaction = await tx.wallet_ilia_transaction.create({
+                data: {
+                    wallet_ilia_id: senderWallet.id,
+                    amount,
+                    type: "transfer",
+                    description: `Transfer sent to ${receiver_id}`,
+                    created_by: sender_id,
+                    receiver_wallet_id: receiverWallet.id,
+                    sender_wallet_id: senderWallet.id
+                }
+            });
+
+            await tx.wallet_ilia_transaction.create({
+                data: {
+                    wallet_ilia_id: receiverWallet.id,
+                    amount,
+                    type: "transfer",
+                    description: `Transfer received from ${sender_id}`,
+                    created_by: sender_id,
+                    receiver_wallet_id: receiverWallet.id,
+                    sender_wallet_id: senderWallet.id
+                }
+            });
+
+            const newSenderBalance = await calculateBalanceFromTransactions(senderWallet.id, tx);
+            const newReceiverBalance = await calculateBalanceFromTransactions(receiverWallet.id, tx);
+
+            await tx.wallet_ilia.update({
+                where: { id: senderWallet.id },
+                data: { balance: newSenderBalance }
+            });
+
+            await tx.wallet_ilia.update({
+                where: { id: receiverWallet.id },
+                data: { balance: newReceiverBalance }
+            });
+
+            return senderTransaction;
         });
 
-        await prisma.wallet_ilia.update({
-            where: { id: receiverWallet.id },
-            data: { balance: { increment: amount } }
-        });
-
-        const transaction = await prisma.wallet_ilia_transaction.create({
-            data: { 
-                wallet_ilia_id: senderWallet.id, 
-                amount, 
-                type: "transfer", 
-                description: "Transferência de dinheiro", 
-                created_by: sender_id, 
-                receiver_wallet_id: receiverWallet.id, 
-                sender_wallet_id: senderWallet.id 
-            }
-        });
-        return transaction as wallet_ilia_transaction;
+        return result as wallet_ilia_transaction;
     } catch (err: any) {
         handleError(err, response);
     }

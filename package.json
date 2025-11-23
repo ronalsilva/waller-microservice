@@ -23,7 +23,8 @@
 		"kafkajs": "^2.2.4",
 		"socket.io": "^4.8.1",
 		"ts-jest": "^29.2.5",
-		"ts-node": "^10.9.2"
+		"ts-node": "^10.9.2",
+		"typescript": "^5.9.3"
 	},
 	"devDependencies": {
 		"@types/jest": "^30.0.0",
