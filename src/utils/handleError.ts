@@ -9,74 +9,74 @@ function handleError(err: any, response: FastifyReply): void {
         case "P1000":
             response.code(500).send({
                 error: 500,
-                message: "Autenticação falhou no servidor de banco de dados"
+                message: "Authentication failed with the database server"
             });
             break;
         case "P1001":
         case "P1002":
             response.code(500).send({
                 error: 500,
-                message: "Não foi possível conectar ao servidor de banco de dados"
+                message: "Unable to connect to the database server"
             });
             break;
         case "P1008":
             response.code(504).send({
                 error: 504,
-                message: "Operação de banco de dados atingiu o tempo limite"
+                message: "Database operation reached the timeout limit"
             });
             break;
         case "P1017":
             response.code(500).send({
                 error: 500,
-                message: "Servidor fechou a conexão"
+                message: "Server closed the connection"
             });
             break;
         case "P2000":
             response.code(400).send({
                 error: 400,
-                message: "O valor fornecido para a coluna é muito longo"
+                message: "The value provided for the column is too long"
             });
             break;
         case "P2002":
             response.code(409).send({
                 error: 409,
-                message: `Já existe um usuário com este email`
+                message: `A user with this email already exists`
             });
             break;
         case "P2003":
             response.code(400).send({
                 error: 400,
-                message: `Erro ao criar usuário: ${err.meta?.field_name}`
+                message: `Error creating user: ${err.meta?.field_name}`
             });
             break;
         case "P2025":
             response.code(404).send({
                 error: 404,
-                message: "Usuário não encontrado"
+                message: "User not found"
             });
             break;
         case "P2011":
             response.code(400).send({
                 error: 400,
-                message: "Erro ao criar usuário"
+                message: "Error creating user"
             });
             break;
         case "P2012":
             response.code(400).send({
                 error: 400,
-                message: "Esta faltando um valor obrigatório"
+                message: "A required value is missing"
             });
             break;
         case "P2014":
             response.code(400).send({
                 error: 400,
-                message: "A alteração que você está tentando fazer violaria uma relação obrigatória"
+                message: "The change you are trying to make violates a required relationship"
             });
             break;
         case "P2024":
             response.code(503).send({
                 error: 503,
-                message: "Tempo esgotado ao buscar uma nova conexão do pool de conexões"
+                message: "Timeout while searching for a new connection from the connection pool"
             });
             break;
         case "404":
@@ -88,7 +88,7 @@ function handleError(err: any, response: FastifyReply): void {
             } else {
                 response.code(404).send({
                     error: 404,
-                    message: "Recurso não encontrado"
+                    message: "Resource not found"
                 });
             }
             response.code(404).send({
@@ -99,7 +99,7 @@ function handleError(err: any, response: FastifyReply): void {
         default:
             response.code(500).send({
                 error: 500,
-                message: "Erro interno do servidor"
+                message: "Internal server error"
             });
             break;
     }
