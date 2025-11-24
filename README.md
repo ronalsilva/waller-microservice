@@ -217,3 +217,5 @@ The microservice manages:
 ---
 
 **Developed with ❤️**
+
+All positive or negative feedback is welcome. 
