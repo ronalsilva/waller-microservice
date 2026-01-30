@@ -116,12 +116,12 @@ export async function transferMoney(response: FastifyReply, sender_id: string, a
             return handleError({ code: "404", message: "Receiver wallet not found" }, response);
         }
 
-        const senderBalance = await calculateBalanceFromTransactions(senderWallet.id);
-        if (senderBalance < amount) {
-            return handleError({ code: "400", message: "Insufficient balance for transfer" }, response);
-        }
-
         const result = await prisma.$transaction(async (tx) => {
+            const senderBalance = await calculateBalanceFromTransactions(senderWallet.id);
+            if (senderBalance < amount) {
+                return handleError({ code: "400", message: "Insufficient balance for transfer" }, response);
+            }
+
             const senderTransaction = await tx.wallet_ilia_transaction.create({
                 data: {
                     wallet_ilia_id: senderWallet.id,
