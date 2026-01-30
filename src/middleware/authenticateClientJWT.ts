@@ -32,7 +32,7 @@ export async function autheticateClientJWT(
         }
         
         request.clientUser = user;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error in authenticateClientJWT:', error);
         reply.code(401).send({ error: 'Unauthorized', message: 'Token verification failed' });
     }
